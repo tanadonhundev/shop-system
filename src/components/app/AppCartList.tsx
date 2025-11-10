@@ -90,9 +90,9 @@ export default function AppCartList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {/* {items.map((item) => (
+          {items.map((item) => (
             <TableRow key={item.productId}>
-              <TableCell>{item.title}</TableCell>
+              <TableCell>{item.productName}</TableCell>
               <TableCell>{item.qty}</TableCell>
               <TableCell>{item.price.toLocaleString()}฿</TableCell>
               <TableCell>{(item.price * item.qty).toLocaleString()}฿</TableCell>
@@ -106,7 +106,7 @@ export default function AppCartList() {
                 </Button>
               </TableCell>
             </TableRow>
-          ))} */}
+          ))}
         </TableBody>
       </Table>
 

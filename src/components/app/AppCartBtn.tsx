@@ -11,7 +11,7 @@ export const AppCartBtn = ({ product }: any) => {
   const handleAdd = () => {
     addItem({
       productId: product.id,
-      title: product.title,
+      productName: product.productName,
       price: product.price,
       qty: 1,
     });
