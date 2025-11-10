@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   TableHeader,
@@ -7,87 +8,156 @@ import {
   TableHead,
   TableBody,
   Table,
+  TableCell,
 } from "@/components/ui/table";
 import AddProductForm from "@/components/app/AddProductForm";
 import axios from "axios";
-//  "id": 5,
-//     "productName": "รองเท้า",
-//     "price": "1539.00",
-//     "stock": 12,
-//     "createdAt": "2025-11-11 01:09:29"
+import { AlertDialogDelete } from "@/components/app/AlertDialogDelete";
 
-type Products = {
+type Product = {
   id: number;
   productName: string;
-  price: number;
+  price: string;
   stock: number;
   createdAt: string;
-  productImages: {
-    id: number;
-    createdAt: string | null;
-    productId: number;
-    imageName: string;
-  }[];
 };
 
+type ProductImage = {
+  id: number;
+  productId: number;
+  imageName: string;
+  createdAt: string | null;
+};
 
+// API response type
+type ApiProductResponse = {
+  products: Product;
+  product_image: ProductImage;
+};
+
+// Component type
+type ProductWithImage = Product & {
+  productImages: ProductImage[];
+};
+
+// Fetch products function
+const fetchProducts = async (): Promise<ProductWithImage[]> => {
+  const res = await axios.get<ApiProductResponse[]>(
+    `${process.env.NEXT_PUBLIC_API_NODE}/api/products`
+  );
+
+  return res.data.map((item) => ({
+    ...item.products,
+    productImages: [item.product_image], // convert single image to array
+  }));
+};
 
 export default function ProductPage() {
   const [open, setOpen] = useState(false);
-  const [products, setProducts] = useState<Products[]>([]);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [products, setProducts] = useState<ProductWithImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null
+  );
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get("/api/ticket");
-      setProducts(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchProducts();
+        setProducts(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  // Pagination
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return products.slice(start, start + itemsPerPage);
+  }, [products, currentPage]);
+
+  console.log(paginatedProducts);
+
+  const handleDelete = (id: number) => {
+    setSelectedProductId(id);
+    setOpenDelete(true);
   };
 
-  const handleAdd = () => {
-    setOpen(true);
-  };
+  if (loading) return <p className="text-center p-4">Loading products...</p>;
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mt-5">
-        <Button onClick={handleAdd}>เพิ่มสินค้า</Button>
+        <Button onClick={() => setOpen(true)}>เพิ่มสินค้า</Button>
       </div>
-      <Table>
+
+      <Table className="mt-4">
         <TableHeader>
           <TableRow>
             <TableHead>สินค้า</TableHead>
             <TableHead>จำนวน</TableHead>
             <TableHead>ราคา</TableHead>
             <TableHead>รวม</TableHead>
-            <TableHead></TableHead>
+            <TableHead>ลบ</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
-          {/* {products.map((p) => (
+          {paginatedProducts.map((p) => (
             <TableRow key={p.id}>
               <TableCell>{p.productName}</TableCell>
-              <TableCell>{p.qty}</TableCell>
-              <TableCell>{item.price.toLocaleString()}฿</TableCell>
-              <TableCell>{(item.price * item.qty).toLocaleString()}฿</TableCell>
+              <TableCell>{p.stock}</TableCell>
+              <TableCell>{p.price}</TableCell>
+              <TableCell>{(+p.price * p.stock).toFixed(2)}</TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeItem(item.productId)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <Button onClick={() => handleDelete(p.id)}>ลบ</Button>
+              </TableCell>
+              <TableCell>
+                {p.productImages.map((img) => img.imageName).join(", ")}
               </TableCell>
             </TableRow>
-          ))} */}
+          ))}
         </TableBody>
       </Table>
+
+      {/* Pagination controls */}
+      <div className="flex justify-between mt-4">
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        >
+          Previous
+        </Button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+        >
+          Next
+        </Button>
+      </div>
       <AddProductForm open={open} onOpenChange={setOpen} />
+      <AlertDialogDelete
+        open={openDelete}
+        onOpenChange={setOpenDelete}
+        productId={selectedProductId}
+      />
     </div>
   );
 }

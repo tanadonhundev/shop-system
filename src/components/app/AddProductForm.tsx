@@ -36,7 +36,7 @@ const formSchema = z.object({
           .refine((file) => file.size > 0, "ไฟล์ต้องไม่ว่างเปล่า")
       )
       .min(1, "ภาพสินค้าห้ามว่าง")
-      .max(5, "อัปโหลดได้ไม่เกิน 5 รูป")
+      .max(1, "อัปโหลดได้ไม่เกิน 1 รูป")
       .superRefine((files, ctx) => {
         files.forEach((file, i) => {
           if (file.size > 5 * 1024 * 1024) {

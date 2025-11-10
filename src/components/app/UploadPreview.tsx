@@ -11,7 +11,11 @@ type UploadPreviewProps = {
   error?: string;
 };
 
-export function UploadPreview({ onChange, value = [], error }: UploadPreviewProps) {
+export function UploadPreview({
+  onChange,
+  value = [],
+  error,
+}: UploadPreviewProps) {
   const [files, setFiles] = useState<PreviewFile[]>(
     value.map((file) =>
       Object.assign(file, {
@@ -55,7 +59,7 @@ export function UploadPreview({ onChange, value = [], error }: UploadPreviewProp
       >
         <input {...getInputProps()} />
         <p className="text-sm text-muted-foreground">
-          ลากและวางรูปภาพ (สูงสุด 5 รูป) หรือคลิกเพื่อเลือก
+          ลากและวางรูปภาพสินค้า (สูงสุด 1 รูป) หรือคลิกเพื่อเลือก
         </p>
       </div>
 
@@ -67,21 +71,18 @@ export function UploadPreview({ onChange, value = [], error }: UploadPreviewProp
             key={file.name}
             className="flex flex-col border rounded-sm w-[200px] p-1 box-border"
           >
-              <button
-                type="button"
-                onClick={() => handleRemove(index)}
-              >
-                x
-              </button>
-              <Image
-                src={file.preview}
-                alt={file.name}
-                width={0}
-                height={0}
-                sizes="100vw"
-                style={{ width: "100%", height: 100 }}
-                priority
-              />
+            <button type="button" onClick={() => handleRemove(index)}>
+              x
+            </button>
+            <Image
+              src={file.preview}
+              alt={file.name}
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: "100%", height: 100 }}
+              priority
+            />
           </div>
         ))}
       </div>

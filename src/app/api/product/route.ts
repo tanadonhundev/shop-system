@@ -1,4 +1,6 @@
-import { handleFileUpload } from "@/services/upload-service";
+import {
+  handleFileUpload,
+} from "@/services/upload-service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
