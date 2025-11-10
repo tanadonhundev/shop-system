@@ -4,12 +4,14 @@ import {
   text,
   timestamp,
   boolean,
+  mysqlEnum,
 } from "drizzle-orm/mysql-core";
 
 export const user = mysqlTable("user", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: text("name").notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
+  role: mysqlEnum(["user", "admin"]).default("user"),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
   createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
@@ -17,7 +19,6 @@ export const user = mysqlTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-  role: text("role").default("user"),
 });
 
 export const session = mysqlTable("session", {

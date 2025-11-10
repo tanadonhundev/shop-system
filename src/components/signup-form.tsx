@@ -10,27 +10,58 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(4, "Password must be at least 4 characters long"),
+  name: z.string().min(1, { message: "ป้อนข้อมูลชื่อด้วย" }),
+  email: z
+    .string()
+    .min(1, { message: "ป้อนข้อมูลอีเมลด้วย" })
+    .email({ message: "รูปแบบอีเมลไม่ถูกต้อง" })
+    .trim(),
+  password: z.string().min(4, { message: "รหัสผ่านต้องมี 4 ตัวขึ้นไป" }).trim(),
 });
 
 const SignUpForm = () => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    await authClient.signUp.email(
+      {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+      },
+      {
+        onRequest: (ctx) => {
+          //show loading
+          console.log("loading", ctx.body);
+        },
+        onSuccess: () => {
+          //redirect to the dashboard or sign in page
+          router.replace("/login");
+          toast.success("สมัครสมาชิกสำเร็จ");
+        },
+        onError: (ctx) => {
+          // display the error message
+          toast.error(ctx.error.message);
+        },
+      }
+    );
   };
 
   return (
@@ -46,6 +77,24 @@ const SignUpForm = () => {
               className="w-full space-y-4"
               onSubmit={form.handleSubmit(onSubmit)}
             >
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="name"
+                        className="w-full"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="email"
