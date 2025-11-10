@@ -1,90 +1,126 @@
 "use client";
-
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { AppCartBtn } from "./AppCartBtn";
-import { id } from "zod/v4/locales";
+import axios from "axios";
 
-interface Product {
+type Product = {
   id: number;
-  name: string;
-  price: number;
+  productName: string;
+  price: string; // API ส่งมาเป็น string
   stock: number;
-  image: string;
-}
+  createdAt: string;
+};
 
-interface ProductListProps {
-  products: Product[];
-}
+type ProductImage = {
+  id: number;
+  productId: number;
+  imageName: string;
+  createdAt: string | null;
+};
 
-const products: Product[] = [
-  {
-    id: 1,
-    name: "ไอศกรีมวานิลลา",
-    price: 59,
-    stock: 10,
-    image: "1.jpg",
-  },
-];
+// ประเภทข้อมูลที่ API ส่งมา
+type ApiProductResponse = {
+  products: Product;
+  product_image: ProductImage;
+};
 
-export default function AppProductList({ products }: ProductListProps) {
+// ประเภทข้อมูลที่จะใช้ใน component
+type ProductWithImage = Product & {
+  productImages: ProductImage[];
+};
+
+export default function AppProductList() {
+  const [products, setProducts] = useState<ProductWithImage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // แบ่งหน้า
+  // Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get<ApiProductResponse[]>(`${process.env.NEXT_PUBLIC_API_NODE}/api/products`);
+
+        // แปลงข้อมูลให้เป็น array ของ ProductWithImage
+        const mappedProducts: ProductWithImage[] = res.data.map((item) => ({
+          ...item.products,
+          productImages: [item.product_image],
+        }));
+
+        setProducts(mappedProducts);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Pagination
   const totalPages = Math.ceil(products.length / itemsPerPage);
-  const paginatedProducts = products.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return products.slice(start, end);
+  }, [products, currentPage]);
+
+  if (loading) return <p className="text-center p-4">Loading products...</p>;
 
   return (
-    <div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
-        {paginatedProducts.map((p) => (
+    <div className="p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {paginatedProducts.map((product) => (
           <div
-            key={p.id}
+            key={product.id}
             className="border p-2 rounded shadow hover:shadow-lg transition-shadow duration-200 relative"
           >
-            {p.stock === 0 && (
+            {product.stock === 0 && (
               <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
                 หมดสต็อก
               </span>
             )}
-            <Image
-              src={`/uploads/${p.image}`}
-              alt={p.name}
-              width={0}
-              height={0}
-              sizes="100vw"
-              style={{ width: "100%", height: 150 }}
-              unoptimized
-              priority
-            />
-            <p className="font-bold text-gray-800">{p.name}</p>
-            <p className="text-gray-600">{p.price} บาท</p>
-            <p className="text-gray-600">คงเหลือ {p.stock}</p>
-            <AppCartBtn product={products} />
+
+            {product.productImages[0] && (
+              <Image
+                src={`/uploads/${product.productImages[0].imageName}`}
+                alt={product.productImages[0].imageName}
+                width={0}
+                height={0}
+                sizes="100vw"
+                style={{ width: "100%", height: 150 }}
+                unoptimized
+                priority
+              />
+            )}
+
+            <p className="font-bold text-gray-800">{product.productName}</p>
+            <p className="text-gray-600">{product.price} บาท</p>
+            <p className="text-gray-600">คงเหลือ {product.stock}</p>
+            <AppCartBtn product={product} />
           </div>
         ))}
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center gap-2 mt-4">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-          <button
-            key={page}
-            onClick={() => setCurrentPage(page)}
-            className={`px-3 py-1 rounded border ${
-              page === currentPage
-                ? "bg-blue-500 text-white"
-                : "bg-white text-gray-700"
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`px-3 py-1 rounded border ${
+                page === currentPage ? "bg-blue-500 text-white" : "bg-white text-gray-700"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

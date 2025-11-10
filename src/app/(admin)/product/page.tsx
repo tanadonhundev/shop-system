@@ -9,9 +9,45 @@ import {
   Table,
 } from "@/components/ui/table";
 import AddProductForm from "@/components/app/AddProductForm";
+import axios from "axios";
+//  "id": 5,
+//     "productName": "รองเท้า",
+//     "price": "1539.00",
+//     "stock": 12,
+//     "createdAt": "2025-11-11 01:09:29"
+
+type Products = {
+  id: number;
+  productName: string;
+  price: number;
+  stock: number;
+  createdAt: string;
+  productImages: {
+    id: number;
+    createdAt: string | null;
+    productId: number;
+    imageName: string;
+  }[];
+};
+
+
 
 export default function ProductPage() {
   const [open, setOpen] = useState(false);
+  const [products, setProducts] = useState<Products[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/api/ticket");
+      setProducts(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAdd = () => {
     setOpen(true);
@@ -32,10 +68,10 @@ export default function ProductPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {/* {items.map((item) => (
-            <TableRow key={item.productId}>
-              <TableCell>{item.title}</TableCell>
-              <TableCell>{item.qty}</TableCell>
+          {/* {products.map((p) => (
+            <TableRow key={p.id}>
+              <TableCell>{p.productName}</TableCell>
+              <TableCell>{p.qty}</TableCell>
               <TableCell>{item.price.toLocaleString()}฿</TableCell>
               <TableCell>{(item.price * item.qty).toLocaleString()}฿</TableCell>
               <TableCell>
