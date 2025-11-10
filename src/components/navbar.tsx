@@ -4,8 +4,14 @@ import { NavigationSheet } from "@/components/navigation-sheet";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { AppCartTotal } from "./app/AppCartTotal";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import AppLogoutButton from "./app/AppLogoutButton";
 
-const Navbar = () => {
+const Navbar = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   return (
     <nav className="h-16 bg-background border-b">
       <div className="h-full flex items-center justify-between max-w-(--breakpoint-xl) mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,13 +28,18 @@ const Navbar = () => {
               <AppCartTotal />
             </div>
           </Link>
-          <Button variant="outline">
-            <Link href={"/login"}>เข้าสู่ระบบ</Link>
-          </Button>
-          <Button>
-            <Link href={"/singup"}>สมัครสามาชิก</Link>
-          </Button>
+          {!session && (
+            <>
+              <Button variant="outline">
+                <Link href={"/login"}>เข้าสู่ระบบ</Link>
+              </Button>
+              <Button>
+                <Link href={"/singup"}>สมัครสามาชิก</Link>
+              </Button>
+            </>
+          )}
 
+          {session && <AppLogoutButton />}
           {/* Mobile Menu */}
           <div className="md:hidden">
             <NavigationSheet />

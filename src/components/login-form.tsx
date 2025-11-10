@@ -10,17 +10,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(4, "Password must be at least 4 characters long"),
+  email: z
+    .string()
+    .min(1, { message: "ป้อนข้อมูลอีเมลด้วย" })
+    .email({ message: "รูปแบบอีเมลไม่ถูกต้อง" })
+    .trim(),
+  password: z.string().min(4, { message: "รหัสผ่านต้องมี 4 ตัวขึ้นไป" }).trim(),
 });
 
 const LoginForm = () => {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       email: "",
@@ -29,8 +38,36 @@ const LoginForm = () => {
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    await authClient.signIn.email(
+      {
+        email: data.email,
+        password: data.password,
+      },
+      {
+        onRequest: (ctx) => {
+          //show loading
+          console.log("loading", ctx.body);
+        },
+        onSuccess: async (ctx) => {
+          //redirect to the dashboard or sign in page
+          console.log("success", ctx.data);
+          // get session (client side)
+          const { data: session } = await authClient.getSession();
+          if (session?.user.role === "admin") {
+            router.replace("/product");
+          } else if (session?.user.role === "user") {
+            router.replace("/");
+          }
+          // router.replace("/");
+          toast.success("เข้าสู่ระบบสำเร็จ");
+        },
+        onError: (ctx) => {
+          console.log(ctx.error);
+          toast.error(ctx.error.message);
+        },
+      }
+    );
   };
 
   return (

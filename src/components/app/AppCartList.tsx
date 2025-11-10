@@ -62,9 +62,9 @@ export default function AppCartList() {
           status: "paid",
         };
       });
-      console.log(orders)
+      console.log(orders);
       const response = await axios.post("/api/order", orders);
-      console.log(response)
+      console.log(response);
       if (response.status === 201) {
         clearItem();
         toast.success(response.data.message);
@@ -74,28 +74,6 @@ export default function AppCartList() {
       router.replace("/login");
     }
   };
-
-  //   const handleCheckout = async () => {
-  //     try {
-  //       const { data: session } = await authClient.getSession();
-  //       if (!session) {
-  //         router.replace("/login");
-  //         return;
-  //       }
-  //       localStorage.setItem("paymentCompleted", "true");
-  //       const response = await fetch("/api/checkout_sessions", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({ items }),
-  //       });
-  //       const data = await response.json();
-  //       if (data.url) {
-  //         router.push(data.url);
-  //       }
-  //     } catch (error) {
-  //       console.error("Checkout failed:", error);
-  //     }
-  //   };
 
   return (
     <div className="mx-auto max-w-4xl mt-20">
@@ -112,7 +90,7 @@ export default function AppCartList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((item) => (
+          {/* {items.map((item) => (
             <TableRow key={item.productId}>
               <TableCell>{item.title}</TableCell>
               <TableCell>{item.qty}</TableCell>
@@ -128,7 +106,7 @@ export default function AppCartList() {
                 </Button>
               </TableCell>
             </TableRow>
-          ))}
+          ))} */}
         </TableBody>
       </Table>
 
@@ -158,12 +136,6 @@ export default function AppCartList() {
           </div>
         </div>
       </div>
-      {/* 
-      <div className="text-right mt-6">
-        <Button onClick={handleCheckout} className="bg-green-500 text-white">
-          ดำเนินการชำระเงิน
-        </Button>
-      </div> */}
     </div>
   );
 }
