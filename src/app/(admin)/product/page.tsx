@@ -9,7 +9,6 @@ import {
   Table,
 } from "@/components/ui/table";
 import AddProductForm from "@/components/app/AddProductForm";
-import Image from "next/image";
 
 export default function ProductPage() {
   const [open, setOpen] = useState(false);
@@ -21,12 +20,6 @@ export default function ProductPage() {
     <div className="max-w-7xl mx-auto">
       <div className="mt-5">
         <Button onClick={handleAdd}>เพิ่มสินค้า</Button>
-        <Image
-          src="http://localhost:3333/uploads/1762792310329.jpg"
-          alt="uploaded"
-          width={300}
-          height={300}
-        />
       </div>
       <Table>
         <TableHeader>

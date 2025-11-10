@@ -66,21 +66,39 @@ const AddProductForm = ({ open, onOpenChange }: AddProductFormProps) => {
   });
 
   const onsubmit = async (data: formvalutes) => {
-    const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("price", data.price.toString());
-    for (const item of data.image) {
-      formData.append("image", item);
-    }
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_NODE}/api/products`,
-      formData,
-      {
+    try {
+      const formData = new FormData();
+      data.image.forEach((file) => {
+        formData.append("image", file);
+      });
+
+      const resUpload = await axios.post("/api/product", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
-    console.log(res.data);
-    // setOpen(false);
+      });
+
+      const uploadedFiles = resUpload.data.files;
+
+      const varules = {
+        title: data.title,
+        price: data.price,
+        images: uploadedFiles,
+      };
+
+      // ส่งต่อข้อมูลไปยัง API Node.js
+      const resFinal = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_NODE}/api/products`,
+        varules,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      console.log("Final API result:", resFinal.data);
+    } catch (error) {
+      console.error("Submit error:", error);
+    }
+
+    onOpenChange(false);
     reset();
   };
 
