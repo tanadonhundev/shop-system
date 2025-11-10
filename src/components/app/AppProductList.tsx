@@ -1,7 +1,9 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import Image from "next/image";
+import { AppCartBtn } from "./AppCartBtn";
+import { id } from "zod/v4/locales";
 
 interface Product {
   id: number;
@@ -15,6 +17,15 @@ interface ProductListProps {
   products: Product[];
 }
 
+const products: Product[] = [
+  {
+    id: 1,
+    name: "ไอศกรีมวานิลลา",
+    price: 59,
+    stock: 10,
+    image: "1.jpg",
+  },
+];
 
 export default function AppProductList({ products }: ProductListProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,16 +64,7 @@ export default function AppProductList({ products }: ProductListProps) {
             <p className="font-bold text-gray-800">{p.name}</p>
             <p className="text-gray-600">{p.price} บาท</p>
             <p className="text-gray-600">คงเหลือ {p.stock}</p>
-            <button
-              className={`w-full p-2 mt-2 rounded text-white font-semibold transition-colors duration-200 ${
-                p.stock > 0
-                  ? "bg-green-500 hover:bg-green-600"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
-              disabled={p.stock === 0}
-            >
-              เพิ่มลงตะกร้า
-            </button>
+            <AppCartBtn product={products} />
           </div>
         ))}
       </div>
