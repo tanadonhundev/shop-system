@@ -17,10 +17,14 @@ import axios from "axios";
 import { UploadPreview } from "./UploadPreview";
 
 const formSchema = z.object({
-  title: z.string().min(1, "ชื่อสินค้าห้ามว่าง"),
+  productName: z.string().min(1, "ชื่อสินค้าห้ามว่าง"),
   price: z
     .string()
-    .transform((val) => parseFloat(val.replace(/[^0-9.]/g, ""))) // e.g., "$1,000" → 1000
+    .transform((val) => parseFloat(val.replace(/[^0-9.]/g, "")))
+    .refine((val) => !isNaN(val), "ราคาต้องเป็นตัวเลขที่ถูกต้อง"),
+  stock: z
+    .string()
+    .transform((val) => parseFloat(val.replace(/[^0-9.]/g, "")))
     .refine((val) => !isNaN(val), "ราคาต้องเป็นตัวเลขที่ถูกต้อง"),
 
   image: z.preprocess(
@@ -79,8 +83,9 @@ const AddProductForm = ({ open, onOpenChange }: AddProductFormProps) => {
       const uploadedFiles = resUpload.data.files;
 
       const varules = {
-        title: data.title,
+        productName: data.productName,
         price: data.price,
+        stock: data.stock,
         images: uploadedFiles,
       };
 
@@ -117,10 +122,14 @@ const AddProductForm = ({ open, onOpenChange }: AddProductFormProps) => {
               <Label htmlFor="title" className="text-right">
                 ชื่อสินค้า
               </Label>
-              <Input id="title" className="col-span-3" {...register("title")} />
-              {errors.title && (
+              <Input
+                id="productName"
+                className="col-span-3"
+                {...register("productName")}
+              />
+              {errors.productName && (
                 <p className="text-red-500 col-span-4 ml-28">
-                  {errors.title.message}
+                  {errors.productName.message}
                 </p>
               )}
             </div>
@@ -132,6 +141,17 @@ const AddProductForm = ({ open, onOpenChange }: AddProductFormProps) => {
               {errors.price && (
                 <p className="text-red-500 col-span-4 ml-28">
                   {errors.price.message}
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="stcok" className="text-right">
+                จำนวน
+              </Label>
+              <Input id="stcok" className="col-span-3" {...register("stock")} />
+              {errors.stock && (
+                <p className="text-red-500 col-span-4 ml-28">
+                  {errors.stock.message}
                 </p>
               )}
             </div>
