@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-
 import { NavMenu } from "@/components/nav-menu";
 import { NavigationSheet } from "@/components/navigation-sheet";
 import Link from "next/link";
@@ -15,7 +14,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="hidden sm:inline-flex">
+          <Button variant="outline">
             <Link href={"/login"}>เข้าสู่ระบบ</Link>
           </Button>
           <Button>
