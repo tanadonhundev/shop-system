@@ -1,0 +1,30 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: shop_system
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  nextjs:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: secret
+      DB_NAME: shop_system
+      DB_PORT: 3306
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  db_data:
