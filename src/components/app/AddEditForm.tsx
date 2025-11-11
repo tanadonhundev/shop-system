@@ -17,6 +17,7 @@ import z from "zod";
 
 import axios from "axios";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   productName: z.string().min(1, "ชื่อสินค้าห้ามว่าง"),
@@ -32,7 +33,7 @@ const formSchema = z.object({
 
 type formvalutes = z.infer<typeof formSchema>;
 
-const AddEditForm = ({ open, onOpenChange, product }: any) => {
+const AddEditForm = ({ open, onOpenChange, product, onSuccess }: any) => {
   const {
     register,
     handleSubmit,
@@ -74,13 +75,15 @@ const AddEditForm = ({ open, onOpenChange, product }: any) => {
     };
 
     try {
-      await axios.put(
+      const res = await axios.put(
         `${process.env.NEXT_PUBLIC_API_NODE}/api/products/${product.id}`,
         payload,
         { headers: { "Content-Type": "application/json" } }
       );
+      toast.success(res.data.message);
       onOpenChange(false);
       reset();
+      onSuccess?.();
     } catch (error) {
       console.error("Submit error:", error);
     }

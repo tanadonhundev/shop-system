@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { k2d } from "../font";
 import "../globals.css";
 import Navbar from "@/components/navbar";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "ShopSystem",
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className={`${k2d.className}`}>
         <Navbar />
         {children}
+        <Toaster richColors position="bottom-center" />
       </body>
     </html>
   );

@@ -15,6 +15,7 @@ import z from "zod";
 
 import axios from "axios";
 import { UploadPreview } from "./UploadPreview";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   productName: z.string().min(1, "ชื่อสินค้าห้ามว่าง"),
@@ -56,9 +57,14 @@ type formvalutes = z.infer<typeof formSchema>;
 type AddProductFormProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 };
 
-const AddProductForm = ({ open, onOpenChange }: AddProductFormProps) => {
+const AddProductForm = ({
+  open,
+  onOpenChange,
+  onSuccess,
+}: AddProductFormProps) => {
   const {
     register,
     handleSubmit,
@@ -97,14 +103,13 @@ const AddProductForm = ({ open, onOpenChange }: AddProductFormProps) => {
           headers: { "Content-Type": "application/json" },
         }
       );
-
-      console.log("Final API result:", resFinal.data);
+      toast.success(resFinal.data.data.message);
+      onSuccess?.();
+      onOpenChange(false);
+      reset();
     } catch (error) {
       console.error("Submit error:", error);
     }
-
-    onOpenChange(false);
-    reset();
   };
 
   return (

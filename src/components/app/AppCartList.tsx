@@ -68,8 +68,8 @@ export default function AppCartList() {
       );
       if (response.data.data.message === "สร้างออเดอร์เรียบร้อย") {
         clearItem();
-        toast.success(response.data.message);
-        router.replace("/product");
+        toast.success(response.data.data.message);
+        // router.replace("/product");
       }
     } else {
       router.replace("/login");

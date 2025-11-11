@@ -63,23 +63,24 @@ export default function ProductPage() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null
   );
-  const [selectedProduct, setSelectedProduct] = useState<ProductWithImage | null>(null)
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductWithImage | null>(null);
 
   const itemsPerPage = 8;
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchProducts();
+      setProducts(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadProducts();
   }, []);
 
@@ -91,15 +92,14 @@ export default function ProductPage() {
     return products.slice(start, start + itemsPerPage);
   }, [products, currentPage]);
 
-
   const handleDelete = (id: number) => {
     setSelectedProductId(id);
     setOpenDelete(true);
   };
 
-   const handleEdit = (id: number) => {
+  const handleEdit = (id: number) => {
     const product = products.find((p) => p.id === id) || null;
-    setSelectedProduct(product); // <-- กำหนดข้อมูลที่ต้องการแก้ไข
+    setSelectedProduct(product);
     setOpenEdit(true);
   };
 
@@ -161,16 +161,22 @@ export default function ProductPage() {
           Next
         </Button>
       </div>
-      <AddProductForm open={open} onOpenChange={setOpen} />
+      <AddProductForm
+        open={open}
+        onOpenChange={setOpen}
+        onSuccess={loadProducts}
+      />
       <AlertDialogDelete
         open={openDelete}
         onOpenChange={setOpenDelete}
         productId={selectedProductId}
+        onSuccess={loadProducts}
       />
       <AddEditForm
         open={openEdit}
         onOpenChange={setOpenEdit}
-        product={selectedProduct} // <-- ส่งข้อมูลให้ edit form
+        product={selectedProduct}
+        onSuccess={loadProducts}
       />
     </div>
   );

@@ -15,25 +15,26 @@ type CancelBookFormProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   productId: number | null;
+  onSuccess: () => void;
 };
 
 export function AlertDialogDelete({
   open,
   onOpenChange,
   productId,
+  onSuccess,
 }: CancelBookFormProps) {
   const handleCancleBoook = async () => {
     try {
       const res = await axios.delete(
         `${process.env.NEXT_PUBLIC_API_NODE}/api/products/${productId}`
       );
-
       onOpenChange(false);
       toast.success(res.data.message);
+      onSuccess?.();
     } catch (error: any) {
       console.error(error.response?.data.message);
       toast.error(error.response?.data.message);
-
       onOpenChange(false);
     }
   };
