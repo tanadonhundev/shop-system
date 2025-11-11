@@ -108,7 +108,7 @@ export default function ProductPage() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mt-5">
-        <Button onClick={() => setOpen(true)}>เพิ่มสินค้า</Button>
+        <Button className="bg-green-500 hover:bg-green-600" onClick={() => setOpen(true)}>เพิ่มสินค้า</Button>
       </div>
 
       <Table className="mt-4">
@@ -118,8 +118,7 @@ export default function ProductPage() {
             <TableHead>จำนวน</TableHead>
             <TableHead>ราคา</TableHead>
             <TableHead>รวม</TableHead>
-            <TableHead>ลบ</TableHead>
-            <TableHead>แก้ไข</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -131,10 +130,20 @@ export default function ProductPage() {
               <TableCell>{p.price}</TableCell>
               <TableCell>{(+p.price * p.stock).toFixed(2)}</TableCell>
               <TableCell>
-                <Button onClick={() => handleDelete(p.id)}>ลบ</Button>
-              </TableCell>
-              <TableCell>
-                <Button onClick={() => handleEdit(p.id)}>แก้ไข</Button>
+                <div className="flex space-x-3">
+                  <Button
+                    className="bg-red-500 hover:bg-red-600"
+                    onClick={() => handleDelete(p.id)}
+                  >
+                    ลบ
+                  </Button>
+                  <Button
+                    className="bg-amber-500 hover:bg-amber-600"
+                    onClick={() => handleEdit(p.id)}
+                  >
+                    แก้ไข
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}

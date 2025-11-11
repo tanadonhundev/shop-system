@@ -43,11 +43,16 @@ export function AlertDialogDelete({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>คุณต้องการยกเลิก?</AlertDialogTitle>
+          <AlertDialogTitle>คุณต้องการลบข้อมูล?</AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-          <AlertDialogAction onClick={handleCancleBoook}>
+          <AlertDialogCancel className="bg-red-500 hover:bg-red-600">
+            ยกเลิก
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-green-500 hover:bg-green-600 text-black"
+            onClick={handleCancleBoook}
+          >
             ยืนยัน
           </AlertDialogAction>
         </AlertDialogFooter>

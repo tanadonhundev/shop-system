@@ -14,6 +14,7 @@ import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -30,6 +31,7 @@ const formSchema = z.object({
 
 const SignUpForm = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       name: "",
@@ -40,6 +42,7 @@ const SignUpForm = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
     await authClient.signUp.email(
       {
         email: data.email,
@@ -59,6 +62,9 @@ const SignUpForm = () => {
         onError: (ctx) => {
           // display the error message
           toast.error(ctx.error.message);
+        },
+        onFinally: () => {
+          setIsLoading(false);
         },
       }
     );
@@ -131,8 +137,16 @@ const SignUpForm = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="mt-4 w-full">
-                สมัครสมาชิก
+
+              <Button
+                disabled={isLoading}
+                type="submit"
+                className="w-full flex items-center justify-center gap-2"
+              >
+                {isLoading && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                {isLoading ? "กำลังสมัครสมาชิก..." : "สมัครสมาชิก"}
               </Button>
             </form>
           </Form>

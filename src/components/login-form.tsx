@@ -14,6 +14,7 @@ import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -29,6 +30,7 @@ const formSchema = z.object({
 
 const LoginForm = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
@@ -39,32 +41,32 @@ const LoginForm = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
     await authClient.signIn.email(
       {
         email: data.email,
         password: data.password,
       },
       {
-        onRequest: (ctx) => {
-          //show loading
-          console.log("loading", ctx.body);
+        onRequest: () => {
+          // console.log("loading", ctx.body);
         },
-        onSuccess: async (ctx) => {
-          //redirect to the dashboard or sign in page
-          console.log("success", ctx.data);
-          // get session (client side)
+        onSuccess: async () => {
+          // console.log("success", ctx.data);
           const { data: session } = await authClient.getSession();
           if (session?.user.role === "admin") {
             router.replace("/product");
           } else if (session?.user.role === "user") {
             router.replace("/");
           }
-          // router.replace("/");
           toast.success("เข้าสู่ระบบสำเร็จ");
         },
         onError: (ctx) => {
           console.log(ctx.error);
           toast.error(ctx.error.message);
+        },
+        onFinally: () => {
+          setIsLoading(false);
         },
       }
     );
@@ -118,8 +120,15 @@ const LoginForm = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                เข้าสู่ระบบ
+              <Button
+                disabled={isLoading}
+                type="submit"
+                className="w-full flex items-center justify-center gap-2"
+              >
+                {isLoading && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                {isLoading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
               </Button>
             </form>
           </Form>
