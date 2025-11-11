@@ -12,13 +12,14 @@ const Navbar = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+  const role: string = session?.user.role ?? "";
   return (
     <nav className="h-16 bg-background border-b">
       <div className="h-full flex items-center justify-between max-w-(--breakpoint-xl) mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-12">
           Logo
           {/* Desktop Menu */}
-          <NavMenu className="hidden md:block" />
+          <NavMenu className="hidden md:block" role={role} />
         </div>
 
         <div className="flex items-center gap-3">

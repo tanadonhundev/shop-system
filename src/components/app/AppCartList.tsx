@@ -62,10 +62,11 @@ export default function AppCartList() {
           status: "paid",
         };
       });
-      console.log(orders);
-      const response = await axios.post("/api/order", orders);
-      console.log(response);
-      if (response.status === 201) {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_NODE}/api/orders`,
+        orders
+      );
+      if (response.data.data.message === "สร้างออเดอร์เรียบร้อย") {
         clearItem();
         toast.success(response.data.message);
         router.replace("/product");
