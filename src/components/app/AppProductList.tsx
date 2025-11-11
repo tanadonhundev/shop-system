@@ -41,7 +41,9 @@ export default function AppProductList() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get<ApiProductResponse[]>(`${process.env.NEXT_PUBLIC_API_NODE}/api/products`);
+        const res = await axios.get<ApiProductResponse[]>(
+          `${process.env.NEXT_PUBLIC_API_NODE}/api/products`
+        );
 
         // แปลงข้อมูลให้เป็น array ของ ProductWithImage
         const mappedProducts: ProductWithImage[] = res.data.map((item) => ({
@@ -99,8 +101,21 @@ export default function AppProductList() {
 
             <p className="font-bold text-gray-800">{product.productName}</p>
             <p className="text-gray-600">{product.price} บาท</p>
-            <p className="text-gray-600">คงเหลือ {product.stock}</p>
-            <AppCartBtn product={product} />
+            {product.stock >= 0 && (
+              <p className="text-gray-600">คงเหลือ {product.stock}</p>
+            )}
+            <AppCartBtn
+              product={product}
+              onAddToCart={() => {
+                setProducts((prev) =>
+                  prev.map((p) =>
+                    p.id === product.id
+                      ? { ...p, stock: Math.max(p.stock - 1, 0) } // ลด stock ลง 1 และไม่ให้ติดลบ
+                      : p
+                  )
+                );
+              }}
+            />
           </div>
         ))}
       </div>
@@ -113,7 +128,9 @@ export default function AppProductList() {
               key={page}
               onClick={() => setCurrentPage(page)}
               className={`px-3 py-1 rounded border ${
-                page === currentPage ? "bg-blue-500 text-white" : "bg-white text-gray-700"
+                page === currentPage
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700"
               }`}
             >
               {page}
