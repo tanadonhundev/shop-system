@@ -13,6 +13,7 @@ import {
 import AddProductForm from "@/components/app/AddProductForm";
 import axios from "axios";
 import { AlertDialogDelete } from "@/components/app/AlertDialogDelete";
+import AddEditForm from "@/components/app/AddEditForm";
 
 type Product = {
   id: number;
@@ -55,12 +56,14 @@ const fetchProducts = async (): Promise<ProductWithImage[]> => {
 export default function ProductPage() {
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
   const [products, setProducts] = useState<ProductWithImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null
   );
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithImage | null>(null)
 
   const itemsPerPage = 8;
 
@@ -88,11 +91,16 @@ export default function ProductPage() {
     return products.slice(start, start + itemsPerPage);
   }, [products, currentPage]);
 
-  console.log(paginatedProducts);
 
   const handleDelete = (id: number) => {
     setSelectedProductId(id);
     setOpenDelete(true);
+  };
+
+   const handleEdit = (id: number) => {
+    const product = products.find((p) => p.id === id) || null;
+    setSelectedProduct(product); // <-- กำหนดข้อมูลที่ต้องการแก้ไข
+    setOpenEdit(true);
   };
 
   if (loading) return <p className="text-center p-4">Loading products...</p>;
@@ -111,6 +119,7 @@ export default function ProductPage() {
             <TableHead>ราคา</TableHead>
             <TableHead>รวม</TableHead>
             <TableHead>ลบ</TableHead>
+            <TableHead>แก้ไข</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -125,7 +134,7 @@ export default function ProductPage() {
                 <Button onClick={() => handleDelete(p.id)}>ลบ</Button>
               </TableCell>
               <TableCell>
-                {p.productImages.map((img) => img.imageName).join(", ")}
+                <Button onClick={() => handleEdit(p.id)}>แก้ไข</Button>
               </TableCell>
             </TableRow>
           ))}
@@ -157,6 +166,11 @@ export default function ProductPage() {
         open={openDelete}
         onOpenChange={setOpenDelete}
         productId={selectedProductId}
+      />
+      <AddEditForm
+        open={openEdit}
+        onOpenChange={setOpenEdit}
+        product={selectedProduct} // <-- ส่งข้อมูลให้ edit form
       />
     </div>
   );
