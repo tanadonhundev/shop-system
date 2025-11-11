@@ -1,15 +1,23 @@
-FROM node:22-alpine
+# ใช้ Node LTS
+FROM node:20-alpine
 
+# ตั้ง working directory
 WORKDIR /app
 
+# คัดลอก package.json + yarn.lock / package-lock.json
 COPY package*.json ./
+
+# ติดตั้ง dependencies
 RUN npm install
 
+# คัดลอกไฟล์โปรเจกต์ทั้งหมด
 COPY . .
 
-# wait-for-it.sh เพื่อรอ DB
-COPY wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
+# build Next.js
+RUN npm run build
 
+# expose port
 EXPOSE 3000
-CMD ["./wait-for-it.sh", "mysql:3306", "--", "npm", "run", "dev"]
+
+# รัน Next.js
+CMD ["npm", "run", "start"]
