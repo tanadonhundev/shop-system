@@ -26,6 +26,7 @@ import {
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { generateInvoicePDF } from "@/lib/invoice";
 // import AppPromptPayQRCode from "./AppPromptPayQRCode";
 
 export default function AppCartList() {
@@ -52,27 +53,65 @@ export default function AppCartList() {
 
   const handleConfirmPlayment = async () => {
     const { data: session } = await authClient.getSession();
-    if (session) {
-      const orders = items.map((item) => {
-        return {
-          userId: session.user.id,
-          price: item.price,
-          productId: item.productId,
-          qty: item.qty,
-          status: "paid",
-        };
-      });
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
+
+    try {
+      // สร้างข้อมูล order สำหรับ API
+      const orders = items.map((item) => ({
+        userId: session.user.id,
+        price: item.price,
+        productId: item.productId,
+        productName: item.productName,
+        qty: item.qty,
+        status: "paid",
+      }));
+      console.log(orders);
+
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_NODE}/api/orders`,
         orders
       );
+
       if (response.data.data.message === "สร้างออเดอร์เรียบร้อย") {
         clearItem();
         toast.success(response.data.data.message);
-        // router.replace("/product");
+
+        // สร้างข้อมูล PDF จากตะกร้าจริง
+        const invoiceData = {
+          customerName: session?.user.name,
+          customerEmail: session?.user.email,
+          date: new Date().toLocaleDateString(),
+          invoiceNo: `SO${Date.now()}`,
+          items: orders.map((item, index) => ({
+            no: (index + 1).toString(),
+            code: item.productId,
+            productName: item.productName,
+            qty: item.qty.toFixed(2),
+            price: item.price.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            }),
+            amount: (item.price * item.qty).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            }),
+          })),
+          total: total.toLocaleString(undefined, { minimumFractionDigits: 2 }),
+          vat: (total * 0.07).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+          }),
+          grandTotal: (total * 1.07).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+          }),
+        };
+
+        // สร้าง PDF
+        generateInvoicePDF(invoiceData);
       }
-    } else {
-      router.replace("/login");
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาดในการชำระเงิน");
+      console.error(error);
     }
   };
 
