@@ -64,6 +64,7 @@ const LoginForm = () => {
         onError: (ctx) => {
           console.log(ctx.error);
           toast.error(ctx.error.message);
+          setIsLoading(false);
         },
         onFinally: () => {
           setIsLoading(false);
